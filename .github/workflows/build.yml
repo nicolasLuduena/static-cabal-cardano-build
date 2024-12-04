@@ -3,9 +3,6 @@ description: Build and push Docker images to GitHub Container Registry
 
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - main
 
 jobs:
   build-and-publish:
