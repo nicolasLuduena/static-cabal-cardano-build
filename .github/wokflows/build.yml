@@ -1,0 +1,35 @@
+name: Docker Build and Push
+description: Build and push Docker images to GitHub Container Registry
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ghc_version: [8.10.7, 9.4.8, 9.6.6, 9.10.1]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg GHC_VERSION=${{ matrix.ghc_version }} \
+            -t ghc-static .
+          docker tag ghc-static ghcr.io/nicolasluduena/cabal-static-${{ matrix.ghc_version }}:latest
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/nicolasluduena/cabal-static-${{ matrix.ghc_version }}:latest
